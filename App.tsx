@@ -8,9 +8,12 @@ import About from './components/About.tsx';
 import Contact from './components/Contact.tsx';
 import AIChatbot from './components/AIChatbot.tsx';
 import Footer from './components/Footer.tsx';
+import ProjectDetail from './components/ProjectDetail.tsx';
+import { Project } from './types.ts';
 
 const App: React.FC = () => {
   const [activeSection, setActiveSection] = useState('home');
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window === 'undefined') return true;
     const saved = localStorage.getItem('theme');
@@ -30,6 +33,8 @@ const App: React.FC = () => {
   }, [isDarkMode]);
 
   useEffect(() => {
+    if (selectedProject) return; // Disable scroll detection on detail page
+
     const handleScroll = () => {
       const sections = ['home', 'work', 'skills', 'about', 'contact'];
       const scrollPosition = window.scrollY + 120;
@@ -45,34 +50,53 @@ const App: React.FC = () => {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [selectedProject]);
 
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
+  // Smooth scroll to home when logo is clicked while in detail page
+  const handleLogoClick = () => {
+    setSelectedProject(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen transition-colors duration-300 bg-white dark:bg-dark">
-      <Navbar activeSection={activeSection} isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
+      <Navbar 
+        activeSection={activeSection} 
+        isDarkMode={isDarkMode} 
+        toggleTheme={toggleTheme} 
+        onLogoClick={handleLogoClick}
+        isDetailPage={!!selectedProject}
+        onBack={() => setSelectedProject(null)}
+      />
       
       <main className="relative">
-        <section id="home" className="min-h-screen">
-          <Hero />
-        </section>
-        
-        <section id="work" className="py-24 bg-zinc-50 dark:bg-[#0d0d0d]">
-          <Work />
-        </section>
-        
-        <section id="skills" className="py-24 bg-white dark:bg-dark">
-          <Skills />
-        </section>
-        
-        <section id="about" className="py-24 bg-zinc-50 dark:bg-[#0d0d0d]">
-          <About />
-        </section>
-        
-        <section id="contact" className="py-24 bg-white dark:bg-dark">
-          <Contact />
-        </section>
+        {selectedProject ? (
+          <ProjectDetail project={selectedProject} onBack={() => setSelectedProject(null)} />
+        ) : (
+          <>
+            <section id="home" className="min-h-screen">
+              <Hero />
+            </section>
+            
+            <section id="work" className="py-24 bg-zinc-50 dark:bg-[#0d0d0d]">
+              <Work onSelectProject={setSelectedProject} />
+            </section>
+            
+            <section id="skills" className="py-24 bg-white dark:bg-dark">
+              <Skills />
+            </section>
+            
+            <section id="about" className="py-24 bg-zinc-50 dark:bg-[#0d0d0d]">
+              <About />
+            </section>
+            
+            <section id="contact" className="py-24 bg-white dark:bg-dark">
+              <Contact />
+            </section>
+          </>
+        )}
       </main>
 
       <AIChatbot />
