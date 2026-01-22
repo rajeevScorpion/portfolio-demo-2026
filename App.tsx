@@ -1,18 +1,18 @@
 
 import React, { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import Work from './components/Work';
-import Skills from './components/Skills';
-import About from './components/About';
-import Contact from './components/Contact';
-import AIChatbot from './components/AIChatbot';
-import Footer from './components/Footer';
+import Navbar from './components/Navbar.tsx';
+import Hero from './components/Hero.tsx';
+import Work from './components/Work.tsx';
+import Skills from './components/Skills.tsx';
+import About from './components/About.tsx';
+import Contact from './components/Contact.tsx';
+import AIChatbot from './components/AIChatbot.tsx';
+import Footer from './components/Footer.tsx';
 
 const App: React.FC = () => {
   const [activeSection, setActiveSection] = useState('home');
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    // Check local storage or system preference
+    if (typeof window === 'undefined') return true;
     const saved = localStorage.getItem('theme');
     if (saved) return saved === 'dark';
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -32,7 +32,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const handleScroll = () => {
       const sections = ['home', 'work', 'skills', 'about', 'contact'];
-      const scrollPosition = window.scrollY + 100;
+      const scrollPosition = window.scrollY + 120;
 
       for (const section of sections) {
         const element = document.getElementById(section);
@@ -43,17 +43,17 @@ const App: React.FC = () => {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
   return (
-    <div className="min-h-screen transition-colors duration-300">
+    <div className="min-h-screen transition-colors duration-300 bg-white dark:bg-dark">
       <Navbar activeSection={activeSection} isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
       
-      <main>
+      <main className="relative">
         <section id="home" className="min-h-screen">
           <Hero />
         </section>

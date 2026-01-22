@@ -1,9 +1,24 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+// Safe access to API key to prevent crashes on environments where process.env is not defined
+const getApiKey = () => {
+  try {
+    return (typeof process !== 'undefined' && process.env && process.env.API_KEY) ? process.env.API_KEY : '';
+  } catch (e) {
+    return '';
+  }
+};
 
 export const getDesignAdvice = async (userPrompt: string) => {
+  const apiKey = getApiKey();
+  
+  if (!apiKey) {
+    return "I'm currently in 'offline' mode. Please make sure the API key is configured to enable my AI brain!";
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
+
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
